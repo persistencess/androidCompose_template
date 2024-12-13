@@ -5,40 +5,60 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
+import com.xczcdjx.word.service.TestService
 import com.xczcdjx.word.share.TextShare
+import com.xczcdjx.word.utils.convertMillToDate
 import com.xczcdjx.word.utils.convertStrToMill
-import com.xczcdjx.word.utils.formatDateTime
+import com.xczcdjx.word.utils.formatDate
 import com.xczcdjx.word.utils.formatNow
+import com.xczcdjx.word.utils.safeService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import javax.inject.Inject
 
 @HiltViewModel
 class TestViewmodel @Inject constructor(
     private val testInf: TextShare
 ) : ViewModel() {
+    private val instance = TestService.instance()
     val getFun = testInf.test()
+    var testData by mutableStateOf("")
+    suspend fun fetch() {
+        // 此处调用safeService会自动捕获异常处理封装到success,和error参数上
+        val res = safeService { instance.test() }
+        res.success?.let {
+            testData = it.name // 成功响应
+        } ?: run {
+            println(res.error) // 失败信息
+        }
+    }
 }
 @Preview(showBackground = true)
 @Composable
 fun Test(modifier: Modifier = Modifier, vm: TestViewmodel = hiltViewModel()) {
+    LaunchedEffect(Unit) {
+//        vm.fetch()
+    }
     Scaffold { pad ->
         Column(modifier.padding(pad)) {
 //            Text(formatDate("2024-08-31 16:00:00"), fontSize = 30.sp)
             // 日期时间处理
-            Text(formatDateTime("2024-09-02T11:44:16.266Z"), fontSize = 30.sp)
+            Text(formatDate("2024-09-02T11:44:16.266Z"), fontSize = 30.sp)
             println(Clock.System.now())
             println(formatNow())
             println(formatNow(showTime = true))
             val mi=convertStrToMill("2024-08-31 16:10:00")
             println(mi)
-            println(formatNow(Instant.fromEpochSeconds(mi/1000),true))
+            println(convertMillToDate(mi))
             // hilt provide
             Text(vm.getFun)
         }
