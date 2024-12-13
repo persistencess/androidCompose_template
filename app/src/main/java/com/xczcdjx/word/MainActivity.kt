@@ -1,18 +1,20 @@
 package com.xczcdjx.word
-
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import coil3.ImageLoader
+import coil3.PlatformContext
+import coil3.compose.setSingletonImageLoaderFactory
+import coil3.disk.DiskCache
+import coil3.memory.MemoryCache
+import coil3.request.CachePolicy
+import coil3.request.crossfade
+import coil3.svg.SvgDecoder
+import coil3.util.DebugLogger
+import com.xczcdjx.word.screen.Test
 import com.xczcdjx.word.ui.theme.PracticeWordTheme
+import okio.FileSystem
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,29 +22,28 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             PracticeWordTheme {
-                Scaffold( modifier = Modifier.fillMaxSize() ) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                // 注册图片加载优化
+                setSingletonImageLoaderFactory { context ->
+                    getAsyncImageLoader(context)
                 }
+                Test()
             }
         }
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+// 配置网络图,svg支持，磁盘缓存等
+fun getAsyncImageLoader(context: PlatformContext) =
+    ImageLoader.Builder(context).memoryCachePolicy(CachePolicy.ENABLED).memoryCache {
+        MemoryCache.Builder().maxSizePercent(context, 0.3).strongReferencesEnabled(true).build()
+    }.diskCachePolicy(CachePolicy.ENABLED).networkCachePolicy(CachePolicy.ENABLED).diskCache {
+        newDiskCache()
+    }.components {
+        add(SvgDecoder.Factory())
+    }.crossfade(true).logger(DebugLogger()).build()
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    PracticeWordTheme {
-        Greeting("Android")
-    }
+fun newDiskCache(): DiskCache {
+    return DiskCache.Builder().directory(FileSystem.SYSTEM_TEMPORARY_DIRECTORY / "image_cache")
+        .maxSizeBytes(1024L * 1024 * 100) // 100MB
+        .build()
 }
