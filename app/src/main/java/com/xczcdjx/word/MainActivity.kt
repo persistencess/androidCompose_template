@@ -14,8 +14,9 @@ import coil3.svg.SvgDecoder
 import coil3.util.DebugLogger
 import com.xczcdjx.word.screen.Test
 import com.xczcdjx.word.ui.theme.PracticeWordTheme
+import dagger.hilt.android.AndroidEntryPoint
 import okio.FileSystem
-
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
