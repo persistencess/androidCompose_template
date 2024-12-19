@@ -40,7 +40,10 @@ class MainActivity : ComponentActivity() {
                 NavHost(navController = controller,
                     startDestination = Routes.Home.route,
                     enterTransition = {
-                        slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left)
+                        slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left,
+                            // 修改过渡时间
+                            animationSpec = tween(500)
+                        )
                     },
                     exitTransition = {
                         slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Left)
