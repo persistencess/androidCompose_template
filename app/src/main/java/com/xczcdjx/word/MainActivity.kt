@@ -3,6 +3,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.compose.setSingletonImageLoaderFactory
@@ -12,6 +19,8 @@ import coil3.request.CachePolicy
 import coil3.request.crossfade
 import coil3.svg.SvgDecoder
 import coil3.util.DebugLogger
+import com.xczcdjx.word.router.Routes
+import com.xczcdjx.word.screen.Home
 import com.xczcdjx.word.screen.Test
 import com.xczcdjx.word.ui.theme.PracticeWordTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -27,7 +36,32 @@ class MainActivity : ComponentActivity() {
                 setSingletonImageLoaderFactory { context ->
                     getAsyncImageLoader(context)
                 }
-                Test()
+                val controller = rememberNavController()
+                NavHost(navController = controller,
+                    startDestination = Routes.Home.route,
+                    enterTransition = {
+                        slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left)
+                    },
+                    exitTransition = {
+                        slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Left)
+                    },
+                    popEnterTransition = {
+                        slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Right)
+                    },
+                    popExitTransition = {
+                        slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Right)
+                    }) {
+                    composable(Routes.Home.route) {
+                        Home() {
+                            controller.navigate(Routes.Test.route)
+                        }
+                    }
+                    composable(Routes.Test.route) {
+                        Test() {
+                            controller.popBackStack()
+                        }
+                    }
+                }
             }
         }
     }

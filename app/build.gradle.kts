@@ -68,6 +68,8 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    // 导航库拓展
+    implementation("org.jetbrains.androidx.navigation:navigation-compose:2.8.0-alpha11")
     // viewmodel
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     // DataStore 数据存储
